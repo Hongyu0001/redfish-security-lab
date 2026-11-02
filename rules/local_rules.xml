@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  DVWA 攻击流量检测规则
+  放到 /var/ossec/etc/rules/local_rules.xml，重启 wazuh-manager 生效。
+  数据源：Apache access.log（DVWA 靶场）
+-->
+<group name="local,dvwa,web-attack,">
+
+  <!-- SQL 注入：UNION 联合查询 -->
+  <rule id="100201" level="12">
+    <decoded_as>web-accesslog</decoded_as>
+    <url_contains>union select</url_contains>
+    <description>DVWA: SQL injection attempt (UNION SELECT)</description>
+    <mitre>
+      <id>T1190</id>
+    </mitre>
+  </rule>
+
+  <!-- SQL 注入：布尔恒真 -->
+  <rule id="100202" level="12">
+    <decoded_as>web-accesslog</decoded_as>
+    <url_contains>' OR</url_contains>
+    <description>DVWA: SQL injection attempt (boolean based)</description>
+    <mitre>
+      <id>T1190</id>
+    </mitre>
+  </rule>
+
+  <!-- SQL 注入：注释截断 -->
+  <rule id="100203" level="10">
+    <decoded_as>web-accesslog</decoded_as>
+    <url_contains>-- -</url_contains>
+    <description>DVWA: SQL injection attempt (comment truncation)</description>
+  </rule>
+
+  <!-- 命令注入 -->
+  <rule id="100204" level="13">
+    <decoded_as>web-accesslog</decoded_as>
+    <url_contains>%3B</url_contains>
+    <description>DVWA: possible command injection (semicolon in request)</description>
+  </rule>
+
+  <!-- XSS 反射/存储 -->
+  <rule id="100205" level="10">
+    <decoded_as>web-accesslog</decoded_as>
+    <url_contains>%3Cscript%3E</url_contains>
+    <description>DVWA: XSS attempt (&lt;script&gt; in request)</description>
+  </rule>
+
+  <!-- 文件包含 -->
+  <rule id="100206" level="12">
+    <decoded_as>web-accesslog</decoded_as>
+    <url_contains>etc/passwd</url_contains>
+    <description>DVWA: local file inclusion attempt (etc/passwd)</description>
+  </rule>
+
+  <!-- 文件上传：上传 php 后立即访问执行 -->
+  <rule id="100207" level="12">
+    <decoded_as>web-accesslog</decoded_as>
+    <url_contains>hackable/uploads/</url_contains>
+    <description>DVWA: access to uploaded file (possible webshell)</description>
+  </rule>
+
+</group>
